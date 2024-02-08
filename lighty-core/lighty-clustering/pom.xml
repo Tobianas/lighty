@@ -34,7 +34,11 @@
         <!--ODL dependencies-->
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-cluster-admin-api</artifactId>
+            <artifactId>sal-cluster-admin-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-cluster-admin-karaf-cli</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
