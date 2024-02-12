@@ -101,18 +101,6 @@ public class KubernetesClusteringHandlerImpl implements ClusteringHandler {
         if (!Cluster.get(actorSystemProvider.getActorSystem()).selfAddress()
                 .equals(Cluster.get(actorSystemProvider.getActorSystem()).state().getLeader())) {
             LOG.info("RPC call - Asking for Shard Snapshots");
-            try {
-                AddReplicasForAllShardsCommand command = new AddReplicasForAllShardsCommand();
-
-                final var rpcResult = clusterAdminRPCService.addReplicasForAllShards(
-                        new AddReplicasForAllShardsInputBuilder().build()).get();
-                LOG.debug("RPC call - Asking for Shard Snapshots result: {}", rpcResult.getResult());
-            } catch (ExecutionException e) {
-                LOG.error("RPC call - Asking for Shard Snapshots failed", e);
-            } catch (InterruptedException e) {
-                LOG.error("RPC call - Asking for Shard Snapshots interrupted", e);
-                Thread.currentThread().interrupt();
-            }
         }
     }
 
