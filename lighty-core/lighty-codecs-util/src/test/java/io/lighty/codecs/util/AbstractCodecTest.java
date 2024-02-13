@@ -40,10 +40,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
+import org.opendaylight.yangtools.yang.data.spi.node.impl.ImmutableContainerNodeBuilder;
+import org.opendaylight.yangtools.yang.data.spi.node.impl.ImmutableLeafNodeBuilder;
+import org.opendaylight.yangtools.yang.data.spi.node.impl.ImmutableMapEntryNodeBuilder;
+import org.opendaylight.yangtools.yang.data.spi.node.impl.ImmutableMapNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.parser.api.YangParserException;
 import org.opendaylight.yangtools.yang.parser.impl.DefaultYangParserFactory;
@@ -73,7 +73,7 @@ public abstract class AbstractCodecTest {
 
     public AbstractCodecTest() throws YangParserException {
         this.bindingCodecContext = createCodecContext(loadModuleInfos());
-        this.effectiveModelContext = bindingCodecContext.getRuntimeContext().getEffectiveModelContext();
+        this.effectiveModelContext = bindingCodecContext.getRuntimeContext().modelContext();
 
         this.toasterTopLevelContainerNode = topLevelContainerNode();
         this.rpcLeafInputNode = rpcLeafInputNode();
@@ -93,7 +93,7 @@ public abstract class AbstractCodecTest {
                 defaultYangParserFactory);
         moduleInfoSnapshotBuilder.add(moduleInfos);
         final BindingRuntimeTypes bindingRuntimeTypes = bindingRuntimeGenerator
-                .generateTypeMapping(moduleInfoSnapshotBuilder.build().getEffectiveModelContext());
+                .generateTypeMapping(moduleInfoSnapshotBuilder.build().modelContext());
 
         final DefaultBindingRuntimeContext defaultBindingRuntimeContext = new DefaultBindingRuntimeContext(
                 bindingRuntimeTypes, moduleInfoSnapshotBuilder.build());
@@ -171,14 +171,14 @@ public abstract class AbstractCodecTest {
     }
 
     private static NormalizedNode listNode() {
-        return ImmutableMapNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(SampleList.QNAME))
+        return ImmutableSystemMapNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(SampleList.QNAME))
                 .withChild((MapEntryNode) listEntryNode()).build();
     }
 
     private static NormalizedNode innerContainerNode() {
         return ImmutableContainerNodeBuilder.create().withNodeIdentifier(NodeIdentifier.create(SampleContainer.QNAME))
                 .withValue(List.of(
-                        ImmutableLeafNodeBuilder.createNode(
+                    org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes.leafNode(
                                 NodeIdentifier.create(qOfTestModel("name")), "name")))
                 .build();
     }
