@@ -36,13 +36,12 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeFactory;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
 import org.opendaylight.mdsal.dom.api.DOMMountPointService;
+import org.opendaylight.mdsal.dom.api.DOMNotificationPublishDemandExtension;
 import org.opendaylight.mdsal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.mdsal.dom.api.DOMNotificationService;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
-import org.opendaylight.mdsal.dom.api.DOMYangTextSourceProvider;
-import org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListenerRegistry;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
@@ -87,7 +86,7 @@ public class LightyCoreSpringConfigurationTest extends AbstractJUnit4SpringConte
     DOMSchemaService domSchemaServiceTestProperty;
 
     @Autowired
-    DOMYangTextSourceProvider domYangTextSourceProviderTestProperty;
+    DOMSchemaService.YangTextSourceExtension domYangTextSourceProviderTestProperty;
 
     @Autowired
     DOMMountPointService domMountPointServiceTestProperty;
@@ -99,7 +98,7 @@ public class LightyCoreSpringConfigurationTest extends AbstractJUnit4SpringConte
     DOMNotificationService domNotificationServiceTestProperty;
 
     @Autowired
-    DOMNotificationSubscriptionListenerRegistry domNotificationSubscriptionListenerRegistryTestProperty;
+    DOMNotificationPublishDemandExtension.DemandListener domNotificationSubscriptionListenerRegistryTestProperty;
 
     @Autowired
     @Qualifier("ConfigDatastore")
