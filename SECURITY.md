@@ -7,15 +7,15 @@ Lighty.io version contains 3 numbers representing MAJOR.MINOR.PATCH (X.Y.Z) leve
 MAJOR number is mapped to major OpenDaylight release
 | Lighty.io | OpenDaylight    |
 |-----------|-----------------|
-| 18.Y.Z    | Argon (18)      |
-| 17.Y.Z    | Chlorine (17)   |
+| 20.Y.Z    | Calcium (20)    |
+| 19.Y.Z    | Potassium (19)  |
 | ...       |                 |
 
 MINOR number is mapped to OpenDaylight service release (SR1, SR2, SR3, ..)
 | Lighty.io | OpenDaylight    |
 |-----------|-----------------|
-| 18.1.Z    | Argon SR1       |
-| 18.2.Z    | Argon SR2       |
+| 20.1.Z    | Calcium SR1     |
+| 20.2.Z    | Calcium SR2     |
 | ...       |                 |
 
 PATCH number represents Lighty.io release, usually security & bug fixes.
