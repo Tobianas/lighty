@@ -140,6 +140,7 @@ public class LightyControllerImpl extends AbstractLightyModule implements Lighty
     private final int maxDataBrokerFutureCallbackPoolSize;
     private final int mailboxCapacity;
     private final boolean metricCaptureEnabled;
+    private DatastoreContextPropertiesUpdater datastoreUpdater;
 
     private Configuration clusterConfiguration;
     private ActorSystemProviderImpl actorSystemProvider;
@@ -362,18 +363,15 @@ public class LightyControllerImpl extends AbstractLightyModule implements Lighty
                 = new DefaultDatastoreContextIntrospectorFactory(this.codec.currentSerializer());
         final DatastoreContextIntrospector introspector = introspectorFactory
                 .newInstance(datastoreContext.getLogicalStoreType(), datastoreProperties);
-        final DatastoreContextPropertiesUpdater updater = new DatastoreContextPropertiesUpdater(introspector,
+        this.datastoreUpdater = new DatastoreContextPropertiesUpdater(introspector,
                 datastoreProperties);
         return DistributedDataStoreFactory.createInstance(domSchemaService, datastoreContext,
-                newDatastoreSnapshotRestore, newActorSystemProvider, introspector, updater, configuration);
+                newDatastoreSnapshotRestore, newActorSystemProvider, introspector, datastoreUpdater, configuration);
     }
 
     @Override
     protected boolean stopProcedure() throws InterruptedException, ExecutionException {
         LOG.debug("Lighty Controller stopProcedure");
-        if (this.clusterSingletonServiceProvider != null) {
-            this.clusterSingletonServiceProvider.close();
-        }
         boolean stopSuccessful = true;
         if (this.akkaEntityOwnershipService != null) {
             try {
@@ -382,6 +380,9 @@ public class LightyControllerImpl extends AbstractLightyModule implements Lighty
                 LOG.error("Closing akka AkkaEntityOwnershipService failed!", e);
                 stopSuccessful = false;
             }
+        }
+        if (this.datastoreUpdater != null) {
+            this.datastoreUpdater.close();
         }
         if (this.listenableFutureExecutor != null) {
             this.listenableFutureExecutor.shutdown();
@@ -397,6 +398,9 @@ public class LightyControllerImpl extends AbstractLightyModule implements Lighty
         }
         if (this.domNotificationRouter != null) {
             this.domNotificationRouter.close();
+        }
+        if (this.domRpcRouter != null) {
+            this.domRpcRouter.close();
         }
 
         modelsRegistration.forEach(Registration::close);
@@ -425,6 +429,16 @@ public class LightyControllerImpl extends AbstractLightyModule implements Lighty
                 LOG.error("Actor system port {} not released in last {} {}", actorSystemPort,
                         ACTOR_SYSTEM_TERMINATE_TIMEOUT, TimeUnit.SECONDS, e);
                 stopSuccessful = false;
+            }
+        }
+        if (this.yangLibraryWriter != null) {
+            this.yangLibraryWriter.close();
+        }
+        if (this.clusterSingletonServiceProvider != null) {
+            try {
+                this.clusterSingletonServiceProvider.close();
+            } catch (ExecutionException | InterruptedException e) {
+                LOG.error("Exception occurred while closing clusterSingletonServiceProvider", e);
             }
         }
         return stopSuccessful;
