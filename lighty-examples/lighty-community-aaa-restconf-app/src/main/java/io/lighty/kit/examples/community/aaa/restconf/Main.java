@@ -110,16 +110,6 @@ public final class Main {
         // 2. Initialize and start Restconf server
         final LightyJettyServerProvider jettyServerBuilder = new LightyJettyServerProvider(new InetSocketAddress(
                 restconfConfiguration.getInetAddress(), restconfConfiguration.getHttpPort()));
-        this.restconf = CommunityRestConfBuilder
-                .from(RestConfConfigUtils.getRestConfConfiguration(restconfConfiguration,
-                    this.lightyController.getServices()))
-                .withLightyServer(jettyServerBuilder)
-                .build();
-        final boolean restconfStartOk = this.restconf.start()
-                .get(modulesConfig.getModuleTimeoutSeconds(), TimeUnit.SECONDS);
-        if (!restconfStartOk) {
-            throw new ModuleStartupException("Community Restconf startup failed!");
-        }
 
         // 3. Initialize and start Lighty AAA
         final DataBroker bindingDataBroker = this.lightyController.getServices().getBindingDataBroker();
@@ -132,6 +122,18 @@ public final class Main {
                 TimeUnit.SECONDS);
         if (!aaaLightyStartOk) {
             throw new ModuleStartupException("AAA module startup failed!");
+        }
+
+        this.restconf = CommunityRestConfBuilder
+            .from(RestConfConfigUtils.getRestConfConfiguration(restconfConfiguration,
+                this.lightyController.getServices()))
+            .withLightyServer(jettyServerBuilder)
+            .withWebSecurer(aaaLighty.getWebContextSecurer())
+            .build();
+        final boolean restconfStartOk = this.restconf.start()
+            .get(modulesConfig.getModuleTimeoutSeconds(), TimeUnit.SECONDS);
+        if (!restconfStartOk) {
+            throw new ModuleStartupException("Community Restconf startup failed!");
         }
 
         // 4. Start Lighty jetty server
