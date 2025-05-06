@@ -12,10 +12,10 @@ import com.google.common.base.Throwables;
 import io.lighty.core.controller.api.AbstractLightyModule;
 import io.lighty.modules.northbound.restconf.community.impl.root.resource.discovery.RootFoundApplication;
 import io.lighty.modules.northbound.restconf.community.impl.util.RestConfConfigUtils;
-import io.lighty.server.LightyServerBuilder;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Set;
+import io.lighty.server.LightyJettyServerProvider;
 import javax.servlet.ServletException;
 import javax.ws.rs.core.Application;
 import org.eclipse.jetty.server.Server;
@@ -63,7 +63,7 @@ public class CommunityRestConf extends AbstractLightyModule {
     private final InetAddress inetAddress;
     private final String restconfServletContextPath;
     private Server jettyServer;
-    private LightyServerBuilder lightyServerBuilder;
+    private LightyJettyServerProvider lightyServerBuilder;
     private JaxRsEndpoint jaxRsEndpoint;
 
     public CommunityRestConf(final DOMDataBroker domDataBroker, final DOMRpcService domRpcService,
@@ -71,7 +71,7 @@ public class CommunityRestConf extends AbstractLightyModule {
             final DOMMountPointService domMountPointService,
             final DOMSchemaService domSchemaService, final InetAddress inetAddress,
             final int httpPort, final String restconfServletContextPath,
-            final LightyServerBuilder serverBuilder) {
+            final LightyJettyServerProvider serverBuilder,
         this.domDataBroker = domDataBroker;
         this.domRpcService = domRpcService;
         this.domActionService = domActionService;
@@ -101,12 +101,17 @@ public class CommunityRestConf extends AbstractLightyModule {
 
         LOG.info("Starting RestconfApplication with configuration {}", streamsConfiguration);
 
+        if (lightyServerBuilder == null){
+            lightyServerBuilder = new LightyJettyServerProvider(new JettyWebServer());
+        }
+
         final MdsalDatabindProvider databindProvider = new MdsalDatabindProvider(domSchemaService);
         final var server = new MdsalRestconfServer(databindProvider, domDataBroker, domRpcService, domActionService,
             domMountPointService);
 
         this.jaxRsEndpoint = new JaxRsEndpoint(new JettyWebServer(httpPort), new LightyWebContextSecurer(),
             new JerseyServletSupport(), new CustomFilterAdapterConfigurationImpl(), server,
+        this.jettyServer = this.lightyServerBuilder.build();
             new MdsalRestconfStreamRegistry(new JaxRsLocationProvider(), domDataBroker),
             JaxRsEndpoint.props(streamsConfiguration));
 
@@ -138,12 +143,6 @@ public class CommunityRestConf extends AbstractLightyModule {
         rrdHandler.addServlet(new ServletHolder(new ServletContainer(ResourceConfig
             .forApplication(rootDiscoveryApp))), "/*");
 
-        boolean startDefault = false;
-        if (this.lightyServerBuilder == null) {
-            this.lightyServerBuilder = new LightyServerBuilder(inetSocketAddress);
-            startDefault = true;
-        }
-        this.lightyServerBuilder.addContextHandler(contexts);
         if (startDefault) {
             startServer();
         }
@@ -183,11 +182,7 @@ public class CommunityRestConf extends AbstractLightyModule {
 
     @SuppressWarnings("checkstyle:illegalCatch")
     public void startServer() {
-        if (this.jettyServer != null && !this.jettyServer.isStopped()) {
-            return;
-        }
         try {
-            this.jettyServer = this.lightyServerBuilder.build();
             this.jettyServer.start();
         } catch (final Exception e) {
             Throwables.throwIfUnchecked(e);

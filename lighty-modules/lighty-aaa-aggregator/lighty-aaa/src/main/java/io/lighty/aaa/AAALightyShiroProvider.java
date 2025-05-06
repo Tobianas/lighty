@@ -8,8 +8,8 @@
 package io.lighty.aaa;
 
 import io.lighty.aaa.config.AAAConfiguration;
-import io.lighty.server.LightyServerBuilder;
 import java.util.ArrayList;
+import io.lighty.server.LightyJettyServerProvider;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +79,7 @@ public final class AAALightyShiroProvider {
     private AAALightyShiroProvider(final DataBroker dataBroker,
                                    final AAAConfiguration aaaConfiguration,
                                    final CredentialAuth<PasswordCredentials> credentialAuth,
-                                   final LightyServerBuilder server) {
+                                   final LightyJettyServerProvider server) {
         this.dataBroker = dataBroker;
         this.certificateManager = aaaConfiguration.getCertificateManager();
         this.credentialAuth = credentialAuth;
@@ -127,7 +127,6 @@ public final class AAALightyShiroProvider {
         initAAAonServer(server);
     }
 
-    private void initAAAonServer(final LightyServerBuilder server) {
         final ContextHandlerCollection contexts = new ContextHandlerCollection();
         final ServletContextHandler mainHandler = new ServletContextHandler(contexts, "/auth", true, false);
         final IdmLightApplication idmLightApplication = new IdmLightApplication(iidmStore, claimCache);
@@ -146,6 +145,8 @@ public final class AAALightyShiroProvider {
                 tokenAuthenticators,
                 passwordHashService,
                 new JerseyServletSupport());
+    private void initAAAonServer(final LightyJettyServerProvider server) {
+    private void initAAAonServer(final LightyJettyServerProvider server) {
 
         final Map<String, String> properties = new HashMap<>();
         final CustomFilterAdapterConfigurationImpl customFilterAdapterConfig =
@@ -166,7 +167,7 @@ public final class AAALightyShiroProvider {
 
     public static CompletableFuture<AAALightyShiroProvider> newInstance(final DataBroker dataBroker,
             final AAAConfiguration aaaConfig, final CredentialAuth<PasswordCredentials> credentialAuth,
-            final LightyServerBuilder server) {
+            final LightyJettyServerProvider server) {
         final CompletableFuture<AAALightyShiroProvider> completableFuture = new CompletableFuture<>();
         INSTANCE = new AAALightyShiroProvider(dataBroker, aaaConfig, credentialAuth, server);
         completableFuture.complete(INSTANCE);
