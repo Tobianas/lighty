@@ -103,26 +103,32 @@ public class RncLightyModuleSmokeTest {
             new X509ExtendedTrustManager() {
                 @Override
                 public void checkClientTrusted(X509Certificate[] x509Certificates, String data, Socket socket) {
+                    // Intentionally left blank: no certificate validation in smoke tests
                 }
 
                 @Override
                 public void checkClientTrusted(X509Certificate[] x509Certificates, String data, SSLEngine sslEngine) {
+                    // Intentionally left blank: no certificate validation in smoke tests
                 }
 
                 @Override
                 public void checkClientTrusted(X509Certificate[] certs, final String authType) {
+                    // Intentionally left blank: no certificate validation in smoke tests
                 }
 
                 @Override
                 public void checkServerTrusted(X509Certificate[] x509Certificates, String data, Socket socket) {
+                    // Intentionally left blank: no certificate validation in smoke tests
                 }
 
                 @Override
                 public void checkServerTrusted(X509Certificate[] x509Certificates, String data, SSLEngine sslEngine) {
+                    // Intentionally left blank: no certificate validation in smoke tests
                 }
 
                 @Override
                 public void checkServerTrusted(X509Certificate[] certs, final String authType) {
+                    // Intentionally left blank: no certificate validation in smoke tests
                 }
 
                 @Override
