@@ -10,16 +10,16 @@ package io.lighty.server;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletException;
 import java.util.EnumSet;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
+import org.eclipse.jetty.ee11.servlet.FilterHolder;
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.opendaylight.aaa.web.WebContext;
 import org.opendaylight.aaa.web.WebServer;
@@ -58,71 +58,64 @@ public abstract class AbstractLightyWebServer implements WebServer {
     @PostConstruct
     public void start() throws Exception {
         server.start();
-        LOG.info("Started Jetty-based HTTP web server on port {} ({}).", httpPort, hashCode());
+        LOG.info("Started Jetty 12-based HTTP web server on port {} ({}).", httpPort, hashCode());
     }
 
     @PreDestroy
     public void stop() throws Exception {
         LOG.info("Stopping Jetty-based web server...");
-        // NB server.stop() will call stop() on all ServletContextHandler/WebAppContext
         server.stop();
         LOG.info("Stopped Jetty-based web server.");
     }
 
     @Override
     public synchronized Registration registerWebContext(final WebContext webContext) throws ServletException {
-        ServletContextHandler handler = new ServletContextHandler(contextHandlerCollection, webContext.contextPath(),
-            webContext.supportsSessions() ? ServletContextHandler.SESSIONS : ServletContextHandler.NO_SESSIONS);
+        // Create ServletContextHandler specifically for EE11 (Jakarta EE 11)
+        ServletContextHandler handler = new ServletContextHandler();
+        handler.setContextPath(webContext.contextPath());
 
-        // The order in which we do things here must be the same as
-        // the equivalent in org.opendaylight.aaa.web.osgi.PaxWebServer
+        if (webContext.supportsSessions()) {
+            handler.insertHandler(new org.eclipse.jetty.ee11.servlet.SessionHandler());
+        }
 
-        // 1. Context parameters - because listeners, filters and servlets could need them
-        webContext.contextParams().entrySet().forEach(entry -> handler.setAttribute(entry.getKey(), entry.getValue()));
-        // also handler.getServletContext().setAttribute(name, value), both seem work
+        // 1. Context parameters
+        webContext.contextParams().forEach(handler::setAttribute);
 
-        // 2. Listeners - because they could set up things that filters and servlets need
-        webContext.listeners().forEach(listener -> handler.addEventListener(listener));
+        // 2. Listeners
+        webContext.listeners().forEach(handler::addEventListener);
 
-        // 3. Filters - because subsequent servlets should already be covered by the filters
+        // 3. Filters
         webContext.filters().forEach(filter -> {
             FilterHolder filterHolder = new FilterHolder(filter.filter());
             filterHolder.setInitParameters(filter.initParams());
             filter.urlPatterns().forEach(
-                urlPattern -> handler.addFilter(filterHolder, urlPattern,
-                    EnumSet.allOf(DispatcherType.class))
+                urlPattern -> handler.addFilter(filterHolder, urlPattern, EnumSet.allOf(DispatcherType.class))
             );
         });
 
-        // 4. servlets - 'bout time for 'em by now, don't you think? ;)
+        // 4. Servlets
         webContext.servlets().forEach(servlet -> {
             ServletHolder servletHolder = new ServletHolder(servlet.name(), servlet.servlet());
             servletHolder.setInitParameters(servlet.initParams());
             servletHolder.setAsyncSupported(servlet.asyncSupported());
-            // AKA <load-on-startup> 1
             servletHolder.setInitOrder(1);
-            servlet.urlPatterns().forEach(
-                urlPattern -> handler.addServlet(servletHolder, urlPattern)
-            );
+            servlet.urlPatterns().forEach(urlPattern -> handler.addServlet(servletHolder, urlPattern));
         });
 
+        contextHandlerCollection.addHandler(handler);
         restart(handler);
 
         return () -> close(handler);
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
     private static void restart(final AbstractLifeCycle lifecycle) throws ServletException {
         try {
             lifecycle.start();
-        } catch (ServletException | RuntimeException e) {
-            throw e;
         } catch (Exception e) {
-            throw new ServletException("registerServlet() start failed", e);
+            throw new ServletException("Lifecycle start failed", e);
         }
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
     private void close(final ServletContextHandler handler) {
         try {
             handler.stop();
