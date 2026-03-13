@@ -45,11 +45,6 @@
             <groupId>io.lighty.applications</groupId>
             <artifactId>lighty-app-modules-config</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 </project>

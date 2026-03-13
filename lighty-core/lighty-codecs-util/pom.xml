@@ -63,11 +63,6 @@
 
         <!-- Test scoped dependencies -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>binding-data-codec-api</artifactId>
             <scope>test</scope>

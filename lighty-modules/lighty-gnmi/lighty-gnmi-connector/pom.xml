@@ -41,11 +41,6 @@
             <artifactId>aaa-encrypt-service</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
       <dependency>
         <groupId>io.lighty.modules</groupId>
         <artifactId>lighty-aaa</artifactId>
