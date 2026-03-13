@@ -8,8 +8,8 @@
 
 package io.lighty.core.controller.util;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.lighty.core.controller.api.LightyController;
 import io.lighty.core.controller.impl.LightyControllerBuilder;
@@ -18,6 +18,10 @@ import io.lighty.core.controller.impl.util.FileToDatastoreUtils;
 import io.lighty.core.controller.impl.util.FileToDatastoreUtils.ImportFileFormat;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -35,10 +39,8 @@ import org.opendaylight.yangtools.binding.DataRoot;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FileToDatastoreUtilsTest {
     private static final String INITIAL_CONTAINER_PATH = "/data/container-value-1.json";
     private static final String CASE_CONTAINER_PATH = "/data/case-container-value.json";
@@ -73,7 +75,7 @@ class FileToDatastoreUtilsTest {
     private LightyController lightyController;
     private DataBroker dataBroker;
 
-    @BeforeClass
+    @BeforeAll
     void startUp() throws Exception {
         lightyController = new LightyControllerBuilder()
                 .from(ControllerConfigUtils.getDefaultSingleNodeConfiguration(
@@ -83,7 +85,7 @@ class FileToDatastoreUtilsTest {
         dataBroker = lightyController.getServices().getBindingDataBroker();
     }
 
-    @AfterClass
+    @AfterAll
     void tearDown() {
         assertTrue(lightyController.shutdown(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
     }

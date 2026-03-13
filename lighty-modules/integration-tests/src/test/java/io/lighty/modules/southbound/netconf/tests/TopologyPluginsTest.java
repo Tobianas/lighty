@@ -23,6 +23,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.mdsal.binding.api.DataBroker;
@@ -52,11 +56,8 @@ import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-@Test
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TopologyPluginsTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(TopologyPluginsTest.class);
@@ -75,7 +76,7 @@ class TopologyPluginsTest {
         return NetconfTopologyPluginBuilder.from(config, services).build();
     }
 
-    @BeforeClass
+    @BeforeAll
     void beforeClass()
             throws ConfigurationException, ExecutionException, InterruptedException, TimeoutException {
         MockitoAnnotations.initMocks(this);
@@ -88,7 +89,7 @@ class TopologyPluginsTest {
         this.netconfPlugin.start().get(MAX_START_TIME_MILLIS, TimeUnit.MILLISECONDS);
     }
 
-    @AfterClass
+    @AfterAll
     void afterClass() {
         if (this.netconfPlugin != null) {
             this.netconfPlugin.shutdown(SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);

@@ -10,6 +10,10 @@ package io.lighty.aaa.config;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.aaa.cert.api.ICertificateManager;
@@ -26,10 +30,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.yang.aaa.cert.mdsal.rev1603
 import org.opendaylight.yang.gen.v1.urn.opendaylight.yang.aaa.cert.mdsal.rev160321.key.stores.SslDataBuilder;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CertificateManagerConfigTest {
 
     private static final String BUNDLE_NAME = "opendaylight";
@@ -43,7 +45,7 @@ class CertificateManagerConfigTest {
     @Mock
     RpcProviderService rpcProviderService;
 
-    @BeforeClass
+    @BeforeAll
     void init() {
         MockitoAnnotations.initMocks(this);
         DataObjectIdentifier<AaaEncryptServiceConfig> build = DataObjectIdentifier
@@ -69,10 +71,10 @@ class CertificateManagerConfigTest {
         ICertificateManager certificateManager = CertificateManagerConfig.getDefault(bindingDataBroker,
                 rpcProviderService);
 
-        Assert.assertNotNull(certificateManager);
-        Assert.assertNotNull(certificateManager.getServerContext());
-        Assert.assertEquals(certificateManager.getServerContext().getProtocol(), "TLS");
-        Assert.assertNotNull(certificateManager.getServerContext().getProvider());
-        Assert.assertNotNull(certificateManager.getServerContext().getDefaultSSLParameters());
+        Assertions.assertNotNull(certificateManager);
+        Assertions.assertNotNull(certificateManager.getServerContext());
+        Assertions.assertEquals(certificateManager.getServerContext().getProtocol(), "TLS");
+        Assertions.assertNotNull(certificateManager.getServerContext().getProvider());
+        Assertions.assertNotNull(certificateManager.getServerContext().getDefaultSSLParameters());
     }
 }

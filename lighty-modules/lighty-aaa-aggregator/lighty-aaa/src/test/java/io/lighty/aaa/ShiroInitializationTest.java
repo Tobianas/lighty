@@ -7,10 +7,10 @@
  */
 package io.lighty.aaa;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.expectThrows;
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertTrue;
 
 import io.lighty.aaa.config.AAAConfiguration;
 import io.lighty.aaa.config.CertificateManagerConfig;
@@ -19,6 +19,10 @@ import io.lighty.server.LightyJettyServerProvider;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.aaa.api.CredentialAuth;
@@ -36,10 +40,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.yang.aaa.cert.mdsal.rev1603
 import org.opendaylight.yang.gen.v1.urn.opendaylight.yang.aaa.cert.mdsal.rev160321.key.stores.SslDataKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ShiroInitializationTest {
     private static final AAAConfiguration AAA_CONFIGURATION = AAAConfigUtils.createDefaultAAAConfiguration();
     private static final String BUNDLE_NAME = "opendaylight";
@@ -55,7 +57,7 @@ class ShiroInitializationTest {
     private RpcProviderService rpcProviderService;
     private AAALighty aaaLighty;
 
-    @BeforeClass
+    @BeforeAll
     void init() {
         // Initialize the mock objects
         MockitoAnnotations.initMocks(this);
@@ -80,7 +82,7 @@ class ShiroInitializationTest {
                 .thenReturn(FluentFutures.immediateFluentFuture(Optional.of(sslData)));
     }
 
-    @AfterMethod
+    @AfterEach
     void tearDown() {
         if (aaaLighty != null) {
             // Stop the object and ensure that stopping was successful
@@ -97,7 +99,7 @@ class ShiroInitializationTest {
         // Ensure that the object was created successfully
         assertNotNull(aaaLighty);
         // Expect an Exception to be thrown when trying to initialize the object
-        expectThrows(Exception.class, () -> aaaLighty.initProcedure());
+        assertThrows(Exception.class, () -> aaaLighty.initProcedure());
     }
 
     // Test that the AAALighty object can be successfully initialized and stopped
