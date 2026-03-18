@@ -14,27 +14,25 @@ import java.security.GeneralSecurityException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.opendaylight.aaa.encrypt.AAAEncryptionService;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AAAEncryptionServiceTest {
 
-    private AAAEncryptionService aaaEncryptionService;
+    private static AAAEncryptionService aaaEncryptionService;
 
     @BeforeAll
-    void init() throws ConfigurationException {
-        this.aaaEncryptionService = NetconfConfigUtils.createAAAEncryptionService(
+    static void init() throws ConfigurationException {
+        aaaEncryptionService = NetconfConfigUtils.createAAAEncryptionService(
                 NetconfConfigUtils.getDefaultAaaEncryptServiceConfig());
     }
 
     @Test
     void testStringEncryptionDecryption() throws GeneralSecurityException {
         final byte[] rawData = "hello world".getBytes();
-        final byte[] encryptedData = this.aaaEncryptionService.encrypt(rawData);
+        final byte[] encryptedData = aaaEncryptionService.encrypt(rawData);
         Assertions.assertNotNull(encryptedData);
         Assertions.assertNotEquals(encryptedData, rawData);
-        final byte[] decryptedData = this.aaaEncryptionService.decrypt(encryptedData);
+        final byte[] decryptedData = aaaEncryptionService.decrypt(encryptedData);
         Assertions.assertNotNull(encryptedData);
         Assertions.assertArrayEquals(decryptedData, rawData);
     }
@@ -43,37 +41,37 @@ class AAAEncryptionServiceTest {
     void testByteEncryptionDecryption() throws GeneralSecurityException {
         final String rawDataString = "hello world";
         final byte[] rawData = rawDataString.getBytes(StandardCharsets.UTF_8);
-        final byte[] encryptedData = this.aaaEncryptionService.encrypt(rawData);
+        final byte[] encryptedData = aaaEncryptionService.encrypt(rawData);
         Assertions.assertNotNull(encryptedData);
         final String encryptedDataString = new String(encryptedData, StandardCharsets.UTF_8);
-        Assertions.assertNotEquals(encryptedDataString, rawDataString);
-        final byte[] decryptedData = this.aaaEncryptionService.decrypt(encryptedData);
+        Assertions.assertNotEquals(rawDataString, encryptedDataString);
+        final byte[] decryptedData = aaaEncryptionService.decrypt(encryptedData);
         Assertions.assertNotNull(encryptedData);
         final String decryptedDataString = new String(decryptedData, StandardCharsets.UTF_8);
-        Assertions.assertEquals(decryptedDataString, rawDataString);
+        Assertions.assertEquals(rawDataString, decryptedDataString);
     }
 
     @Test
     void testNullInputs() throws GeneralSecurityException {
-        Assertions.assertNull(this.aaaEncryptionService.decrypt(null));
-        Assertions.assertNull(this.aaaEncryptionService.encrypt(null));
+        Assertions.assertNull(aaaEncryptionService.decrypt(null));
+        Assertions.assertNull(aaaEncryptionService.encrypt(null));
     }
 
     @Test
     void testEmptyInputs() throws GeneralSecurityException {
         final byte[] byteData = new byte[0];
-        final byte[] decryptedBytes = this.aaaEncryptionService.decrypt(byteData);
+        final byte[] decryptedBytes = aaaEncryptionService.decrypt(byteData);
         Assertions.assertNotNull(decryptedBytes);
-        Assertions.assertEquals(decryptedBytes.length, 0);
-        final byte[] encryptedBytes = this.aaaEncryptionService.encrypt(byteData);
+        Assertions.assertEquals(0, decryptedBytes.length);
+        final byte[] encryptedBytes = aaaEncryptionService.encrypt(byteData);
         Assertions.assertNotNull(encryptedBytes);
-        Assertions.assertEquals(encryptedBytes.length, 0);
+        Assertions.assertEquals(0, encryptedBytes.length);
     }
 
     @Test
     void testDecryptBadByteData() throws GeneralSecurityException {
         final byte[] byteData = "test data".getBytes(StandardCharsets.UTF_8);
-        final byte[] decryptedBytes = this.aaaEncryptionService.decrypt(byteData);
+        final byte[] decryptedBytes = aaaEncryptionService.decrypt(byteData);
         Assertions.assertEquals(decryptedBytes, byteData);
     }
 }

@@ -26,7 +26,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -34,13 +33,12 @@ import org.junit.jupiter.api.extension.TestWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class NettyRestConfTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(NettyRestConfTestBase.class);
     private static final long SHUTDOWN_TIMEOUT_MILLIS = 60_000;
 
-    private LightyController lightyController;
-    private NettyRestConf nettyRestConf;
+    private static LightyController lightyController;
+    private static NettyRestConf nettyRestConf;
 
     @RegisterExtension
     final TestWatcher resultLogger = new TestWatcher() {
@@ -71,7 +69,7 @@ public abstract class NettyRestConfTestBase {
 
     @BeforeAll
     @Timeout(value = 60_000, unit = TimeUnit.MILLISECONDS)
-    public void startControllerAndRestConf() throws Exception {
+    public static void startControllerAndRestConf() throws Exception {
         final var moduleInfos = new HashSet<>(NettyRestConfUtils.YANG_MODELS);
         moduleInfos.add(org.opendaylight.yang.svc.v1.instance.identifier.patch.module.rev151121
             .YangModuleInfoImpl.getInstance());
@@ -116,7 +114,7 @@ public abstract class NettyRestConfTestBase {
     }
 
     @AfterAll
-    public void shutdownLighty() {
+    public static void shutdownLighty() {
         boolean nettyShutdownResult = true;
         boolean lightyShutdownResult = true;
         if (nettyRestConf != null) {

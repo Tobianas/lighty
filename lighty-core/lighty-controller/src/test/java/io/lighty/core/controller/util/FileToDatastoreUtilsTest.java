@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -40,7 +39,6 @@ import org.opendaylight.yangtools.yang.common.Uint32;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FileToDatastoreUtilsTest {
     private static final String INITIAL_CONTAINER_PATH = "/data/container-value-1.json";
     private static final String CASE_CONTAINER_PATH = "/data/case-container-value.json";
@@ -72,11 +70,11 @@ class FileToDatastoreUtilsTest {
 
     private static final long TIMEOUT_MILLIS = 60_000;
 
-    private LightyController lightyController;
-    private DataBroker dataBroker;
+    private static LightyController lightyController;
+    private static DataBroker dataBroker;
 
     @BeforeAll
-    void startUp() throws Exception {
+    static void startUp() throws Exception {
         lightyController = new LightyControllerBuilder()
                 .from(ControllerConfigUtils.getDefaultSingleNodeConfiguration(
                         Set.of(YangModuleInfoImpl.getInstance())))
@@ -86,7 +84,7 @@ class FileToDatastoreUtilsTest {
     }
 
     @AfterAll
-    void tearDown() {
+    static void tearDown() {
         assertTrue(lightyController.shutdown(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
     }
 

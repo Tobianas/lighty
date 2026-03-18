@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2019 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
- *  This program and the accompanying materials are made available under the
- *  terms of the Eclipse Public License v1.0 which accompanies this distribution,
- *  and is available at http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package io.lighty.aaa.config;
 
@@ -11,9 +11,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.aaa.cert.api.ICertificateManager;
@@ -31,23 +30,24 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.yang.aaa.cert.mdsal.rev1603
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CertificateManagerConfigTest {
 
     private static final String BUNDLE_NAME = "opendaylight";
 
     @Mock
-    DataBroker bindingDataBroker;
+    private DataBroker bindingDataBroker;
 
     @Mock
-    ReadTransaction readTransaction;
+    private ReadTransaction readTransaction;
 
     @Mock
-    RpcProviderService rpcProviderService;
+    private RpcProviderService rpcProviderService;
 
-    @BeforeAll
-    void init() {
-        MockitoAnnotations.initMocks(this);
+    @BeforeEach
+    void setUp() {
+        // Initialize mocks before each test execution
+        MockitoAnnotations.openMocks(this);
+
         DataObjectIdentifier<AaaEncryptServiceConfig> build = DataObjectIdentifier
             .builder(AaaEncryptServiceConfig.class).build();
         when(bindingDataBroker.newReadOnlyTransaction()).thenReturn(readTransaction);
@@ -73,7 +73,7 @@ class CertificateManagerConfigTest {
 
         Assertions.assertNotNull(certificateManager);
         Assertions.assertNotNull(certificateManager.getServerContext());
-        Assertions.assertEquals(certificateManager.getServerContext().getProtocol(), "TLS");
+        Assertions.assertEquals("TLS", certificateManager.getServerContext().getProtocol());
         Assertions.assertNotNull(certificateManager.getServerContext().getProvider());
         Assertions.assertNotNull(certificateManager.getServerContext().getDefaultSSLParameters());
     }

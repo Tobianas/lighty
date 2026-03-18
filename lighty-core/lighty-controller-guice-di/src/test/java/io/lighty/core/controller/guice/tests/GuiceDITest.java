@@ -22,19 +22,17 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GuiceDITest {
     private static final Logger LOG = LoggerFactory.getLogger(GuiceDITest.class);
 
-    private LightyController lightyController;
-    private TestService testService;
+    private static LightyController lightyController;
+    private static TestService testService;
 
     @BeforeAll
-    void init() throws ExecutionException, InterruptedException, ConfigurationException {
+    static void init() throws ExecutionException, InterruptedException, ConfigurationException {
         ControllerConfiguration defaultSingleNodeConfiguration =
             ControllerConfigUtils.getDefaultSingleNodeConfiguration();
         LightyControllerBuilder lightyControllerBuilder = new LightyControllerBuilder();
@@ -50,7 +48,7 @@ class GuiceDITest {
 
     @AfterAll
     @SuppressWarnings("checkstyle:illegalCatch")
-    void shutdown() {
+    static void shutdown() {
         try {
             if (lightyController != null) {
                 lightyController.shutdown(60, TimeUnit.SECONDS);

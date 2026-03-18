@@ -25,7 +25,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -37,16 +36,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for lighty-openApi tests handlin starting and shutting-down of lighty with restConf and openApi module.
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class OpenApiLightyTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpenApiLightyTestBase.class);
     public static final long SHUTDOWN_TIMEOUT_MILLIS = 60_000;
 
-    private LightyController lightyController;
-    private OpenApiLighty openApiModule;
-    private CommunityRestConf communityRestConf;
-    private JaxRsOpenApi jaxRsOpenApi;
+    private static LightyController lightyController;
+    private static OpenApiLighty openApiModule;
+    private static CommunityRestConf communityRestConf;
+    private static JaxRsOpenApi jaxRsOpenApi;
 
     @RegisterExtension
     final TestWatcher resultLogger = new TestWatcher() {
@@ -77,7 +75,7 @@ public abstract class OpenApiLightyTestBase {
 
     @BeforeAll
     @Timeout(value = 60_000, unit = TimeUnit.MILLISECONDS)
-    public void startControllerAndRestConf() throws Exception {
+    public static void startControllerAndRestConf() throws Exception {
         LOG.info("Building LightyController");
         LightyControllerBuilder lightyControllerBuilder = new LightyControllerBuilder();
         lightyController = lightyControllerBuilder.from(ControllerConfigUtils.getDefaultSingleNodeConfiguration(
@@ -113,7 +111,7 @@ public abstract class OpenApiLightyTestBase {
     }
 
     @AfterAll
-    public void shutdownLighty() {
+    public static void shutdownLighty() {
         if (openApiModule != null) {
             openApiModule.shutdown(SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }

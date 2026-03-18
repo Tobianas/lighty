@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.TestInstance;
 import org.opendaylight.netconf.client.mdsal.api.BaseNetconfSchema;
 import org.opendaylight.netconf.client.mdsal.api.NetconfSessionPreferences;
 import org.opendaylight.netconf.client.mdsal.impl.DefaultBaseNetconfSchemaProvider;
@@ -28,15 +27,14 @@ import org.opendaylight.yangtools.yang.parser.impl.DefaultYangParserFactory;
 import org.opendaylight.yangtools.yang.xpath.impl.AntlrXPathParserFactory;
 import org.w3c.dom.Element;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class NetconfBaseServiceBaseTest {
 
-    protected EffectiveModelContext effectiveModelContext;
-    protected MountPointContext mountContext;
-    protected BaseNetconfSchema baseSchema;
+    protected static EffectiveModelContext effectiveModelContext;
+    protected static MountPointContext mountContext;
+    protected static BaseNetconfSchema baseSchema;
 
     @BeforeAll
-    void beforeTest() throws YangParserException {
+    static void beforeTest() throws YangParserException { // Must be static
         final Set<YangModuleInfo> yangModuleInfos = Set.of(
                 org.opendaylight.yang.svc.v1.urn.ietf.params.xml.ns.yang.ietf.datastores.rev180214
                         .YangModuleInfoImpl.getInstance(),

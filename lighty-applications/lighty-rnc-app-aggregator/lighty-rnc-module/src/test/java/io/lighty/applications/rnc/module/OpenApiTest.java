@@ -24,18 +24,16 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OpenApiTest {
     private static final String BASE_URL = "http://localhost:8888";
     private static final String PRIMARY_NAME = "urls.primaryName";
     private static final String APIDOC_INDEX = "/openapi/explorer/index.html";
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
-    private RncLightyModule rncModule;
+    private static RncLightyModule rncModule;
 
     static Stream<String> openApiUris() {
         return Stream.of(
@@ -48,15 +46,15 @@ class OpenApiTest {
     }
 
     @BeforeAll
-    void startUp() throws Exception {
-        final var configPath = Paths.get(Objects.requireNonNull(this.getClass()
-                .getResource("/openapi_config.json")).toURI());
+    static void startUp() throws Exception {
+        final var configPath = Paths.get(Objects.requireNonNull(OpenApiTest.class
+            .getResource("/openapi_config.json")).toURI());
         rncModule = new RncLightyModule(RncLightyModuleConfigUtils.loadConfigFromFile(configPath));
         assertTrue(rncModule.initModules());
     }
 
     @AfterAll
-    void tearDown() {
+    static void tearDown() {
         assertTrue(rncModule.close());
     }
 

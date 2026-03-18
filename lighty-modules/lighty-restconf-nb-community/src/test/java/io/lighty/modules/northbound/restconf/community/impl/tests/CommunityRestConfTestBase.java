@@ -22,7 +22,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -34,14 +33,13 @@ import org.slf4j.LoggerFactory;
 /**
  * author: vincent on 15.8.2017.
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class CommunityRestConfTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommunityRestConfTestBase.class);
     public static final long SHUTDOWN_TIMEOUT_MILLIS = 60_000;
 
-    private LightyController lightyController;
-    private CommunityRestConf communityRestConf;
+    private static LightyController lightyController;
+    private static CommunityRestConf communityRestConf;
 
     @RegisterExtension
     final TestWatcher resultLogger = new TestWatcher() {
@@ -72,7 +70,7 @@ public abstract class CommunityRestConfTestBase {
 
     @BeforeAll
     @Timeout(value = 60_000, unit = TimeUnit.MILLISECONDS)
-    public void startControllerAndRestConf() throws Exception {
+    public static void startControllerAndRestConf() throws Exception {
 
         final Set<YangModuleInfo> moduleInfos = new java.util.HashSet<>(RestConfConfigUtils.YANG_MODELS);
         moduleInfos.add(org.opendaylight.yang.svc.v1.instance.identifier.patch.module.rev151121
@@ -105,7 +103,7 @@ public abstract class CommunityRestConfTestBase {
     }
 
     @AfterAll
-    public void shutdownLighty() {
+    public static void shutdownLighty() {
         if (communityRestConf != null) {
             communityRestConf.shutdown(SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }

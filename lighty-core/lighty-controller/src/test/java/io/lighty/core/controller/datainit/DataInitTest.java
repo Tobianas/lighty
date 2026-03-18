@@ -18,14 +18,12 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.Toaster;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DataInitTest {
     private static final String PATH_TO_JSON_INIT_CONFIG = "/DataInitJsonConfig.json";
     private static final String PATH_TO_XML_INIT_CONFIG = "/DataInitXmlConfig.json";

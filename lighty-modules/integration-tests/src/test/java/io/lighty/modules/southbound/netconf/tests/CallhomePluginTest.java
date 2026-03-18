@@ -23,18 +23,16 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CallhomePluginTest {
     public static final long SHUTDOWN_TIMEOUT_MILLIS = 60_000;
 
-    private LightyController lightyController;
-    private CommunityRestConf restConf;
-    private LightyModule netconfPlugin;
+    private static LightyController lightyController;
+    private static CommunityRestConf restConf;
+    private static LightyModule netconfPlugin;
 
     @BeforeAll
-    void beforeClass() throws ConfigurationException {
+    static void beforeClass() throws ConfigurationException {
         lightyController = LightyTestUtils.startController(NetconfConfigUtils.NETCONF_CALLHOME_MODELS);
         RestConfConfiguration restConfConfig =
                 RestConfConfigUtils.getDefaultRestConfConfiguration();
@@ -47,7 +45,7 @@ class CallhomePluginTest {
     }
 
     @AfterAll
-    void afterClass() {
+    static void afterClass() {
         if (netconfPlugin != null) {
             netconfPlugin.shutdown(SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }

@@ -20,9 +20,8 @@ import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.aaa.api.CredentialAuth;
@@ -41,10 +40,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.yang.aaa.cert.mdsal.rev1603
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ShiroInitializationTest {
-    private static final AAAConfiguration AAA_CONFIGURATION = AAAConfigUtils.createDefaultAAAConfiguration();
     private static final String BUNDLE_NAME = "opendaylight";
+    private AAAConfiguration aaaConfiguration;
+
     @Mock
     private LightyJettyServerProvider server;
     @Mock
@@ -57,10 +56,11 @@ class ShiroInitializationTest {
     private RpcProviderService rpcProviderService;
     private AAALighty aaaLighty;
 
-    @BeforeAll
+    @BeforeEach
     void init() {
         // Initialize the mock objects
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
+        aaaConfiguration = AAAConfigUtils.createDefaultAAAConfiguration();
 
         // Set up mocks for some datastore reads
         final DataObjectIdentifier<AaaEncryptServiceConfig> aaaEncryptInstanceIdentifier = DataObjectIdentifier
@@ -95,7 +95,7 @@ class ShiroInitializationTest {
     @Test
     void testStopProcedureWithFailedInitialization() {
         // Create an AAALighty object with mocked dependencies
-        this.aaaLighty = new AAALighty(bindingDataBroker, credentialAuth, server, AAA_CONFIGURATION);
+        this.aaaLighty = new AAALighty(bindingDataBroker, credentialAuth, server, aaaConfiguration);
         // Ensure that the object was created successfully
         assertNotNull(aaaLighty);
         // Expect an Exception to be thrown when trying to initialize the object
@@ -106,7 +106,7 @@ class ShiroInitializationTest {
     @Test
     void testSuccessfulInitialization() throws InterruptedException {
         // set CertificateManager
-        AAA_CONFIGURATION.setCertificateManager(
+        aaaConfiguration.setCertificateManager(
                 CertificateManagerConfig.getDefault(bindingDataBroker, rpcProviderService));
 
         // Create a LightyServerBuilder object
@@ -114,7 +114,7 @@ class ShiroInitializationTest {
                 new InetSocketAddress("localhost/127.0.0.1", 8182));
 
         // Create an AAALighty object
-        this.aaaLighty = new AAALighty(bindingDataBroker, null, serverBuilder, AAA_CONFIGURATION);
+        this.aaaLighty = new AAALighty(bindingDataBroker, null, serverBuilder, aaaConfiguration);
         // Ensure that the object was created successfully
         assertNotNull(aaaLighty);
 

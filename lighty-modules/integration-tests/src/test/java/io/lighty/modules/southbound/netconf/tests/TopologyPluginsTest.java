@@ -25,8 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.mdsal.binding.api.DataBroker;
@@ -57,15 +57,14 @@ import org.opendaylight.yangtools.yang.common.Uint16;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TopologyPluginsTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(TopologyPluginsTest.class);
     public static final long SHUTDOWN_TIMEOUT_MILLIS = 60_000;
 
-    private LightyController lightyController;
-    private CommunityRestConf restConf;
-    private LightyModule netconfPlugin;
+    private static LightyController lightyController;
+    private static CommunityRestConf restConf;
+    private static LightyModule netconfPlugin;
     @Mock
     private Future<NetconfClientSession> initFuture;
 
@@ -77,28 +76,31 @@ class TopologyPluginsTest {
     }
 
     @BeforeAll
-    void beforeClass()
+    static void beforeClass()
             throws ConfigurationException, ExecutionException, InterruptedException, TimeoutException {
-        MockitoAnnotations.initMocks(this);
-
-        this.lightyController = LightyTestUtils.startController();
+        lightyController = LightyTestUtils.startController();
         RestConfConfiguration restConfConfig =
                 RestConfConfigUtils.getDefaultRestConfConfiguration();
-        this.restConf = LightyTestUtils.startRestconf(restConfConfig, this.lightyController.getServices());
-        this.netconfPlugin = startSingleNodeNetconf(this.lightyController.getServices());
-        this.netconfPlugin.start().get(MAX_START_TIME_MILLIS, TimeUnit.MILLISECONDS);
+        restConf = LightyTestUtils.startRestconf(restConfConfig, lightyController.getServices());
+        netconfPlugin = startSingleNodeNetconf(lightyController.getServices());
+        netconfPlugin.start().get(MAX_START_TIME_MILLIS, TimeUnit.MILLISECONDS);
+    }
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @AfterAll
-    void afterClass() {
-        if (this.netconfPlugin != null) {
-            this.netconfPlugin.shutdown(SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+    static void afterClass() {
+        if (netconfPlugin != null) {
+            netconfPlugin.shutdown(SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }
-        if (this.restConf != null) {
-            this.restConf.shutdown(SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        if (restConf != null) {
+            restConf.shutdown(SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }
-        if (this.lightyController != null) {
-            this.lightyController.shutdown(SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        if (lightyController != null) {
+            lightyController.shutdown(SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -127,7 +129,7 @@ class TopologyPluginsTest {
                 .child(Topology.class, new TopologyKey(new TopologyId("topology-netconf")))
                 .child(Node.class, nodeKey)
                 .build();
-        final DataBroker bindingDataBroker = this.lightyController.getServices().getBindingDataBroker();
+        final DataBroker bindingDataBroker = lightyController.getServices().getBindingDataBroker();
         final WriteTransaction writeTransaction = bindingDataBroker.newWriteOnlyTransaction();
         writeTransaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, path, node);
         writeTransaction.commit().get();
