@@ -96,6 +96,7 @@ public class RncLightyModule {
             startAndWaitLightyModule(callhomePlugin);
         } catch (RncLightyAppStartException e) {
             LOG.error("Unable to initialize and start RNC lighty.io module!", e);
+            close();
             return false;
         }
         LOG.info("RNC lighty.io module initialized successfully!");
