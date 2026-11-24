@@ -80,7 +80,7 @@ assertNodeConnected() {
 # 1. WAIT FOR CONTROLLER TO WAKE UP
 # Service healthcheck (:30888/restconf/operations)
 for i in {1..30}; do
-  status=$(curl -o /dev/null -s -w "%{http_code}\n" --user admin:admin -H "Content-Type: application/json" --insecure http://$MINIKUBE_IP:$CONTROLLER_PORT/restconf/operations || echo "000")
+  status=$(curl -H "Accept: application/yang-data+json" -o /dev/null -s -w "%{http_code}\n" --user admin:admin -H "Content-Type: application/json" --insecure http://$MINIKUBE_IP:$CONTROLLER_PORT/restconf/operations || echo "000")
   if [[ "$status" == "200" ]]; then
     echo "Controller is UP!"
     break
@@ -106,15 +106,15 @@ sleep 1
 
 for pod_controller_ip in $POD_CONTROLLER_IPS; \
 do \
-  assertHttpStatusCode $(curl -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" --user admin:admin -H "Content-Type: application/json" --insecure http://$pod_controller_ip:8888/restconf/operations) \
+  assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" --user admin:admin -H "Content-Type: application/json" --insecure http://$pod_controller_ip:8888/restconf/operations) \
 ;done
 sleep 1
 
 #Service healthcheck (:30888/restconf/operations)
-assertHttpStatusCode $(curl -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" --user admin:admin -H "Content-Type: application/json" --insecure http://$MINIKUBE_IP:$CONTROLLER_PORT/restconf/operations)
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" --user admin:admin -H "Content-Type: application/json" --insecure http://$MINIKUBE_IP:$CONTROLLER_PORT/restconf/operations)
 
 # add gNMI node into gNMI topology
-assertHttpStatusCode $(curl -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_effective}\n" \
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_effective}\n" \
   http://"$MINIKUBE_IP":$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=gnmi-topology/node=node-"${MINIKUBE_IP//.}" \
   -H 'Content-Type: application/json' \
   -d '{
@@ -139,7 +139,7 @@ printLine
 echo "Check if gnmi-simulator is connected"
 connection_status="FAILURE"
 for i in {1..10} ; do
-  connection_status=$(assertNodeConnected $(curl -X GET -s \
+  connection_status=$(assertNodeConnected $(curl -H "Accept: application/yang-data+json" -X GET -s \
   'http://'"$MINIKUBE_IP"':'"$CONTROLLER_PORT"'/restconf/data/network-topology:network-topology/topology=gnmi-topology/node='node-"${MINIKUBE_IP//.}"'/gnmi-topology:node-state/node-status'))
   echo -e "Connection status check $i: $connection_status"
   if [[ $connection_status == "READY" ]]
@@ -151,11 +151,11 @@ for i in {1..10} ; do
 done
 echo ""
 
-assertHttpStatusCode $(curl -X GET -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" \
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X GET -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" \
   'http://'"$MINIKUBE_IP"':'"$CONTROLLER_PORT"'/restconf/data/network-topology:network-topology/topology=gnmi-topology/node='node-"${MINIKUBE_IP//.}"'?content=config')
 sleep 1
 
-assertHttpStatusCode $(curl -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_effective}\n" \
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_effective}\n" \
   http://"$MINIKUBE_IP":$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=gnmi-topology/node=node-"${MINIKUBE_IP//.}"/yang-ext:mount/openconfig-system:system/aaa/authentication \
   -H 'Content-Type: application/json' \
   -d '{
@@ -174,12 +174,12 @@ assertHttpStatusCode $(curl -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_ef
 }')
 sleep 1
 
-assertHttpStatusCode $(curl -X GET -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" \
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X GET -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" \
   'http://'"$MINIKUBE_IP"':'"$CONTROLLER_PORT"'/restconf/data/network-topology:network-topology/topology=gnmi-topology/node='node-"${MINIKUBE_IP//.}"'/yang-ext:mount/openconfig-system:system/aaa/authentication?content=nonconfig' \
   -H 'cache-control: no-cache')
 sleep 1
 
-assertHttpStatusCode $(curl -X PATCH -o /dev/null -s -w "%{http_code} PATCH %{url_effective}\n" \
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X PATCH -o /dev/null -s -w "%{http_code} PATCH %{url_effective}\n" \
   http://"$MINIKUBE_IP":$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=gnmi-topology/node=node-"${MINIKUBE_IP//.}"/yang-ext:mount/openconfig-system:system/aaa/authentication/config \
   -H 'Content-Type: application/json' \
   -d '{
@@ -191,11 +191,11 @@ assertHttpStatusCode $(curl -X PATCH -o /dev/null -s -w "%{http_code} PATCH %{ur
 }')
 sleep 1
 
-assertHttpStatusCode $(curl -X DELETE -o /dev/null -s -w "%{http_code} DELETE %{url_effective}\n" \
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X DELETE -o /dev/null -s -w "%{http_code} DELETE %{url_effective}\n" \
   http://"$MINIKUBE_IP":$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=gnmi-topology/node=node-"${MINIKUBE_IP//.}"/yang-ext:mount/openconfig-system:system/aaa/authentication/config)
 sleep 1
 
-assertHttpStatusCode $(curl -X DELETE -o /dev/null -s -w "%{http_code} DELETE %{url_effective}\n" \
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X DELETE -o /dev/null -s -w "%{http_code} DELETE %{url_effective}\n" \
 http://"$MINIKUBE_IP":$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=gnmi-topology/node=node-"${MINIKUBE_IP//.}")
 
 # Check if some test failed

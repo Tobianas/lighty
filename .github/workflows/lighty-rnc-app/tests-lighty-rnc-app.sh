@@ -89,16 +89,16 @@ sleep 1
 
 for pod_controller_ip in $POD_CONTROLLER_IPS; \
 do \
-  assertHttpStatusCode $(curl -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" --user admin:admin -H "Content-Type: application/json" --insecure http://$pod_controller_ip:8888/restconf/operations) \
+  assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" --user admin:admin -H "Content-Type: application/json" --insecure http://$pod_controller_ip:8888/restconf/operations) \
 ;done
 sleep 1
 
 # Service healthcheck (:30888/restconf/operations)
-assertHttpStatusCode $(curl -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" --user admin:admin -H "Content-Type: application/json" --insecure http://$MINIKUBE_IP:$CONTROLLER_PORT/restconf/operations)
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" --user admin:admin -H "Content-Type: application/json" --insecure http://$MINIKUBE_IP:$CONTROLLER_PORT/restconf/operations)
 sleep 1
 
 # add node into topology
-  assertHttpStatusCode $(curl -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_effective}\n" http://"$MINIKUBE_IP":$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=topology-netconf/node=node-"${SIMULATOR_IP//.}" \
+  assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_effective}\n" http://"$MINIKUBE_IP":$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=topology-netconf/node=node-"${SIMULATOR_IP//.}" \
   -H 'Content-Type: application/json' \
   -d '{
       "netconf-topology:node" :[
@@ -123,7 +123,7 @@ printLine
 echo "Check if netconf-simulator is connected"
 connection_status="not-connected"
 for i in {1..20} ; do
-  connection_status=$(assertNodeConnected $(curl -X GET -s \
+  connection_status=$(assertNodeConnected $(curl -H "Accept: application/yang-data+json" -X GET -s \
   'http://'"$MINIKUBE_IP"':'"$CONTROLLER_PORT"'/restconf/data/network-topology:network-topology/topology=topology-netconf/node='node-"${SIMULATOR_IP//.}"'/netconf-node-topology:netconf-node/connection-status'))
   echo -e "Connection status: $connection_status"
   if [[ $connection_status == "connected" ]]
@@ -134,7 +134,7 @@ for i in {1..20} ; do
   sleep 1
 done
 
-assertHttpStatusCode $(curl -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_effective}\n" \
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_effective}\n" \
   http://"$MINIKUBE_IP":$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=topology-netconf/node=node-"${SIMULATOR_IP//.}"/yang-ext:mount/network-topology:network-topology \
   -H 'Content-Type: application/json' \
   -d '{
@@ -148,16 +148,16 @@ assertHttpStatusCode $(curl -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_ef
 }')
 sleep 1
 
-assertHttpStatusCode $(curl -X GET -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" \
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X GET -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" \
   http://"$MINIKUBE_IP":$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=topology-netconf/node=node-"${SIMULATOR_IP//.}"/yang-ext:mount/network-topology:network-topology/topology=new-topology \
   -H 'Content-Type: application/json')
 sleep 1
 
-assertHttpStatusCode $(curl -X DELETE -o /dev/null -s -w "%{http_code} DELETE %{url_effective}\n" \
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X DELETE -o /dev/null -s -w "%{http_code} DELETE %{url_effective}\n" \
   http://"$MINIKUBE_IP":$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=topology-netconf/node=node-"${SIMULATOR_IP//.}"/yang-ext:mount/network-topology:network-topology/topology=new-topology)
 sleep 1
 
-assertHttpStatusCode $(curl -X DELETE -o /dev/null -s -w "%{http_code} DELETE %{url_effective}\n" \
+assertHttpStatusCode $(curl -H "Accept: application/yang-data+json" -X DELETE -o /dev/null -s -w "%{http_code} DELETE %{url_effective}\n" \
 http://"$MINIKUBE_IP":$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=topology-netconf/node=node-"${SIMULATOR_IP//.}")
 
 # Check if some test failed

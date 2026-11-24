@@ -30,7 +30,7 @@ do \
     revision=$version
   fi
 
-  curl -X POST -o /dev/null -s -w "Model: $modelName\nStatus Code: %{http_code}\nURL: %{url_effective}\n\r" \
+  curl -H "Accept: application/yang-data+json" -X POST -o /dev/null -s -w "Model: $modelName\nStatus Code: %{http_code}\nURL: %{url_effective}\n\r" \
   http://"$MINIKUBE_IP":30888/restconf/operations/gnmi-yang-storage:upload-yang-model \
   -H 'Content-Type: application/json' \
   -d '{

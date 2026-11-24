@@ -129,7 +129,7 @@ assertPodsTopologyResponse() {
   local currentNormalizedResponse=""
   for pod_controller_ip in $POD_CONTROLLER_IPS;
   do
-    TOPOLOGY_RESPONSE=$(curl --request GET \
+    TOPOLOGY_RESPONSE=$(curl --request GET -H "Accept: application/yang-data+json" \
       "http://$pod_controller_ip:$CONTROLLER_PORT/restconf/data/network-topology:network-topology")
       if [[ -z "$TOPOLOGY_RESPONSE" ]]
       then
@@ -196,13 +196,13 @@ validateTestStatus
 # Pods health check (:8888/restconf/operations)
 for pod_controller_ip in $POD_CONTROLLER_IPS; \
 do \
-  assertHttpStatusCode "$(curl -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" \
+  assertHttpStatusCode "$(curl -H "Accept: application/yang-data+json" -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" \
    -H "Content-Type: application/json" \
    "http://$pod_controller_ip:$CONTROLLER_PORT/restconf/operations")" \
 ;done
 
 # Add node into topology
-  assertHttpStatusCode "$(curl -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_effective}\n" \
+  assertHttpStatusCode "$(curl -H "Accept: application/yang-data+json" -X PUT -o /dev/null -s -w "%{http_code} PUT %{url_effective}\n" \
   "http://$CTRL0_IP:$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=topology-netconf/node=node-${SIMULATOR_IP//.}" \
   -H 'Content-Type: application/json' \
   -d '{
@@ -227,7 +227,7 @@ printLine
 echo "Check if netconf-simulator is connected"
 connection_status="not-connected"
 for i in {1..20} ; do
-  connection_status=$(assertNodeConnected "$(curl -X GET -s \
+  connection_status=$(assertNodeConnected "$(curl -H "Accept: application/yang-data+json" -X GET -s \
   "http://$CTRL0_IP:$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=topology-netconf/node=node-${SIMULATOR_IP//.}/netconf-node-topology:netconf-node/connection-status")")
   echo -e "Connection status: $connection_status"
   if [[ $connection_status == "connected" ]]
@@ -240,7 +240,7 @@ done
 
 for pod_controller_ip in $POD_CONTROLLER_IPS; \
 do \
-  assertHttpStatusCode "$(curl -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" \
+  assertHttpStatusCode "$(curl -H "Accept: application/yang-data+json" -o /dev/null -s -w "%{http_code} GET %{url_effective}\n" \
     -H "Content-Type: application/json" \
      "http://$pod_controller_ip:$CONTROLLER_PORT/restconf/data/network-topology:network-topology")" \
 ;done
@@ -285,7 +285,7 @@ assertPodsTopologyResponse
 validateTestStatus
 
 ## Remove device
-assertHttpStatusCode "$(curl -X DELETE -o /dev/null -s -w "%{http_code} DELETE %{url_effective}\n" \
+assertHttpStatusCode "$(curl -H "Accept: application/yang-data+json" -X DELETE -o /dev/null -s -w "%{http_code} DELETE %{url_effective}\n" \
  "http://$CTRL0_IP:$CONTROLLER_PORT/restconf/data/network-topology:network-topology/topology=topology-netconf/node=node-${SIMULATOR_IP//.}")"
 # Wait until clusters are updated
 sleep 15
