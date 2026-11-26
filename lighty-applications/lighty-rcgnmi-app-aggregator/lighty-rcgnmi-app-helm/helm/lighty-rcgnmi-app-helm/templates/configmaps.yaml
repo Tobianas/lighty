@@ -81,6 +81,9 @@ data:
       log-level = "debug"
 
       actor {
+        # ODL EOS stores DOMEntity in Pekko distributed-data, which relies on Java serialization.
+        # Set explicitly, stock pekko-actor reference.conf (via pekko-management) defaults it to off.
+        allow-java-serialization = on
         warn-about-java-serializer-usage = off
         provider = "org.apache.pekko.cluster.ClusterActorRefProvider"
         serializers {
